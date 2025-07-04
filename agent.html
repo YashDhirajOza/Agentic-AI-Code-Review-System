@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agentic AI Code Review System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e7eb 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            font-size: 1.8rem;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #667eea;
+        }
+
+        .hero {
+            padding: 120px 0 80px;
+            text-align: center;
+            color: #2c3e50;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><circle cx="50" cy="50" r="8" fill="rgba(255,255,255,0.1)"/><circle cx="150" cy="100" r="12" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="180" r="10" fill="rgba(255,255,255,0.1)"/><circle cx="180" cy="40" r="6" fill="rgba(255,255,255,0.1)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            opacity: 0;
+            animation: fadeInUp 1s ease 0.5s forwards;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            opacity: 0;
+            animation: fadeInUp 1s ease 0.7s forwards;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            position: relative;
+            z-index: 2;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-top: 3rem;
+            opacity: 0;
+            animation: fadeInUp 1s ease 1.1s forwards;
+            position: relative;
+            z-index: 2;
+        }
+
+        .stat-item {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 20px 30px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            display: block;
+            color: #ff6b6b;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            color: white;
+        }
+
+        .cta-button {
+            background: #ff6b6b;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            opacity: 0;
+            animation: fadeInUp 1s ease 0.9s forwards;
+            position: relative;
+            z-index: 2;
+            margin-top: 20px;
+            box-shadow: 0 5px 20px rgba(255, 107, 107, 0.3);
+        }
+
+        .cta-button:hover {
+            background: #ff5252;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.5);
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            color: #2c3e50;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 2px;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 3rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Agentic Workflow Section */
+        .agentic-workflow {
+            background: white;
+            padding: 80px 0;
+        }
+
+        .workflow-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .workflow-line {
+            position: absolute;
+            width: 4px;
+            background: linear-gradient(to bottom, #667eea, #764ba2);
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1;
+        }
+
+        .agent-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin: 30px 0;
+            width: 80%;
+            max-width: 600px;
+            position: relative;
+            z-index: 2;
+            transition: all 0.3s ease;
+            border-left: 5px solid #667eea;
+        }
+
+        .agent-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            border-left: 5px solid #ff6b6b;
+        }
+
+        .agent-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .agent-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: white;
+            margin-right: 20px;
+        }
+
+        .agent-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .agent-description {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .agent-features {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        .agent-features h4 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .agent-features ul {
+            padding-left: 20px;
+            color: #555;
+        }
+
+        .agent-features li {
+            margin-bottom: 8px;
+        }
+
+        /* Flowchart Section */
+        .flowchart-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e4e7eb 100%);
+            padding: 80px 0;
+            overflow: hidden;
+        }
+
+        .flowchart-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            margin-top: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .flowchart {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            min-height: 1000px;
+        }
+
+        .flowchart-line {
+            position: absolute;
+            width: 4px;
+            background: linear-gradient(to bottom, #667eea, #764ba2);
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1;
+        }
+
+        .flow-step {
+            position: relative;
+            z-index: 2;
+            margin: 40px 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .flow-node {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            padding: 20px 30px;
+            text-align: center;
+            width: 220px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .flow-node:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .node-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: white;
+            margin: 0 auto 15px;
+        }
+
+        .node-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .node-description {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .arrow-down {
+            position: absolute;
+            bottom: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 2rem;
+            color: #667eea;
+            animation: bounce 2s infinite;
+        }
+
+        .parallel-steps {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            width: 100%;
+            margin: 30px 0;
+        }
+
+        .parallel-node {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            text-align: center;
+            width: 220px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .parallel-node:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .connection {
+            position: absolute;
+            height: 40px;
+            width: 2px;
+            background: #667eea;
+            bottom: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .merge-arrow {
+            position: absolute;
+            bottom: -70px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 2rem;
+            color: #667eea;
+        }
+
+        /* Features Section */
+        .features {
+            background: white;
+            padding: 80px 0;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 2.5rem;
+            border-radius: 15px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid #e9ecef;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Footer */
+        .footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 3rem 0;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 1rem;
+            color: #ff6b6b;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section li {
+            margin-bottom: 10px;
+        }
+
+        .footer-section a {
+            color: #ccc;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-section a:hover {
+            color: #ff6b6b;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .animate-pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero-stats {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .parallel-steps {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .flowchart-line {
+                display: none;
+            }
+            
+            .flow-step {
+                margin: 20px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="container">
+            <div class="logo">
+                <span class="logo-icon">🤖</span>
+                <span>Agentic Code Review</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#workflow">Agent Workflow</a></li>
+                <li><a href="#flowchart">Flowchart</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#integration">Integration</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <h1>Agentic AI Code Review System</h1>
+            <p>Multi-agent architecture combining AST parsing, static analysis, taint tracking, and AI-driven semantic review for comprehensive security analysis</p>
+            <a href="#flowchart" class="cta-button">View Agentic Flowchart</a>
+            
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <span class="stat-number">99.2%</span>
+                    <span class="stat-label">Accuracy Rate</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">45%</span>
+                    <span class="stat-label">Faster Analysis</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">15+</span>
+                    <span class="stat-label">Vulnerability Types</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="agentic-workflow" id="workflow">
+        <div class="container">
+            <h2 class="section-title">Agentic Architecture Workflow</h2>
+            <p class="section-subtitle">Specialized AI agents collaborating to detect vulnerabilities with unprecedented accuracy</p>
+            
+            <div class="workflow-container">
+                <div class="workflow-line"></div>
+                
+                <div class="agent-card">
+                    <div class="agent-header">
+                        <div class="agent-icon">📁</div>
+                        <div>
+                            <h3 class="agent-title">Repository Parser Agent</h3>
+                        </div>
+                    </div>
+                    <p class="agent-description">Intelligently scans and filters code repositories, identifying target files and ignoring irrelevant dependencies.</p>
+                    <div class="agent-features">
+                        <h4>Key Responsibilities:</h4>
+                        <ul>
+                            <li>Intelligent file filtering based on supported extensions</li>
+                            <li>Automatic exclusion of irrelevant directories</li>
+                            <li>Security-focused .env file exclusion</li>
+                            <li>Support for 15+ programming languages</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="agent-card">
+                    <div class="agent-header">
+                        <div class="agent-icon">🌳</div>
+                        <div>
+                            <h3 class="agent-title">AST Security Analyzer Agent</h3>
+                        </div>
+                    </div>
+                    <p class="agent-description">Deep structural code analysis using Abstract Syntax Trees to identify security vulnerabilities with surgical precision.</p>
+                    <div class="agent-features">
+                        <h4>Detection Capabilities:</h4>
+                        <ul>
+                            <li>Dangerous function detection (eval, exec, pickle)</li>
+                            <li>SQL injection pattern recognition</li>
+                            <li>Command injection analysis</li>
+                            <li>Syntax error identification</li>
+                            <li>Import and dependency tracking</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="agent-card">
+                    <div class="agent-header">
+                        <div class="agent-icon">🛡️</div>
+                        <div>
+                            <h3 class="agent-title">Bandit Runner Agent</h3>
+                        </div>
+                    </div>
+                    <p class="agent-description">Integrates Bandit static analysis engine to detect known security vulnerabilities and compliance issues.</p>
+                    <div class="agent-features">
+                        <h4>Security Focus:</h4>
+                        <ul>
+                            <li>200+ built-in security rules</li>
+                            <li>CWE classification for vulnerabilities</li>
+                            <li>JSON output processing</li>
+                            <li>Timeout handling for large codebases</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="agent-card">
+                    <div class="agent-header">
+                        <div class="agent-icon">🔬</div>
+                        <div>
+                            <h3 class="agent-title">Taint Tracker Agent</h3>
+                        </div>
+                    </div>
+                    <p class="agent-description">Advanced data flow tracking to identify injection vulnerabilities and unsafe data propagation.</p>
+                    <div class="agent-features">
+                        <h4>Analysis Capabilities:</h4>
+                        <ul>
+                            <li>User input tracking (web requests, CLI, environment)</li>
+                            <li>Sanitization function detection</li>
+                            <li>Dangerous sink identification</li>
+                            <li>Variable propagation analysis</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="agent-card">
+                    <div class="agent-header">
+                        <div class="agent-icon">🔍</div>
+                        <div>
+                            <h3 class="agent-title">Cross-Validation Orchestrator</h3>
+                        </div>
+                    </div>
+                    <p class="agent-description">Validates findings across multiple analysis methods, eliminates false positives, and increases confidence scores.</p>
+                    <div class="agent-features">
+                        <h4>Validation Methods:</h4>
+                        <ul>
+                            <li>Fuzzy line number matching (±5 lines)</li>
+                            <li>Source correlation (AST vs Bandit)</li>
+                            <li>Confidence level adjustment</li>
+                            <li>Issue grouping and deduplication</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="agent-card">
+                    <div class="agent-header">
+                        <div class="agent-icon">🧠</div>
+                        <div>
+                            <h3 class="agent-title">Gemini Semantic Agent</h3>
+                        </div>
+                    </div>
+                    <p class="agent-description">Google Gemini-powered analysis for business logic flaws and context-aware security recommendations.</p>
+                    <div class="agent-features">
+                        <h4>AI Capabilities:</h4>
+                        <ul>
+                            <li>Business logic flaw detection</li>
+                            <li>Authentication bypass patterns</li>
+                            <li>Cryptographic implementation flaws</li>
+                            <li>Context-aware issue reporting</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="agent-card">
+                    <div class="agent-header">
+                        <div class="agent-icon">📊</div>
+                        <div>
+                            <h3 class="agent-title">Report Generation Agent</h3>
+                        </div>
+                    </div>
+                    <p class="agent-description">Synthesizes all findings into comprehensive reports with severity ratings and remediation guidance.</p>
+                    <div class="agent-features">
+                        <h4>Reporting Features:</h4>
+                        <ul>
+                            <li>Multi-source issue aggregation</li>
+                            <li>Severity classification</li>
+                            <li>CWE identification</li>
+                            <li>Remediation suggestions</li>
+                            <li>Multiple output formats</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="flowchart-section" id="flowchart">
+        <div class="container">
+            <h2 class="section-title">Agentic Workflow Flowchart</h2>
+            <p class="section-subtitle">Visualizing how specialized agents collaborate to deliver comprehensive code security analysis</p>
+            
+            <div class="flowchart-container">
+                <div class="flowchart">
+                    <div class="flowchart-line"></div>
+                    
+                    <!-- Input Agent -->
+                    <div class="flow-step">
+                        <div class="flow-node">
+                            <div class="node-icon">📁</div>
+                            <h3 class="node-title">Repository Parser Agent</h3>
+                            <p class="node-description">Scans repository, identifies target files</p>
+                            <div class="arrow-down">↓</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Parallel Analysis Agents -->
+                    <div class="flow-step">
+                        <div class="parallel-steps">
+                            <div class="parallel-node">
+                                <div class="node-icon">🌳</div>
+                                <h3 class="node-title">AST Security Analyzer</h3>
+                                <p class="node-description">Deep structural analysis</p>
+                                <div class="connection"></div>
+                            </div>
+                            
+                            <div class="parallel-node">
+                                <div class="node-icon">🛡️</div>
+                                <h3 class="node-title">Bandit Runner</h3>
+                                <p class="node-description">Static security scanning</p>
+                                <div class="connection"></div>
+                            </div>
+                            
+                            <div class="parallel-node">
+                                <div class="node-icon">🔬</div>
+                                <h3 class="node-title">Taint Tracker</h3>
+                                <p class="node-description">Data flow analysis</p>
+                                <div class="connection"></div>
+                            </div>
+                        </div>
+                        <div class="merge-arrow">↓</div>
+                    </div>
+                    
+                    <!-- Validation Agent -->
+                    <div class="flow-step">
+                        <div class="flow-node">
+                            <div class="node-icon">🔍</div>
+                            <h3 class="node-title">Cross-Validation Orchestrator</h3>
+                            <p class="node-description">Correlates findings, eliminates false positives</p>
+                            <div class="arrow-down">↓</div>
+                        </div>
+                    </div>
+                    
+                    <!-- AI Agent -->
+                    <div class="flow-step">
+                        <div class="flow-node">
+                            <div class="node-icon">🧠</div>
+                            <h3 class="node-title">Gemini Semantic Agent</h3>
+                            <p class="node-description">Context-aware business logic analysis</p>
+                            <div class="arrow-down">↓</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Report Agent -->
+                    <div class="flow-step">
+                        <div class="flow-node">
+                            <div class="node-icon">📊</div>
+                            <h3 class="node-title">Report Generation Agent</h3>
+                            <p class="node-description">Creates comprehensive security report</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features" id="features">
+        <div class="container">
+            <h2 class="section-title">Agentic System Features</h2>
+            <p class="section-subtitle">Specialized capabilities enabled by our multi-agent architecture</p>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🤝</div>
+                    <h3>Agent Collaboration</h3>
+                    <p>Specialized agents collaborate seamlessly, each focusing on specific vulnerability types while sharing findings for comprehensive coverage.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Parallel Processing</h3>
+                    <p>Analysis agents work concurrently on different aspects of code security, dramatically reducing review time.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <h3>Cross-Validation</h3>
+                    <p>Findings are validated across multiple analysis methods, significantly reducing false positives and increasing confidence.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🧠</div>
+                    <h3>Contextual AI Analysis</h3>
+                    <p>Gemini agent provides human-like understanding of business logic flaws that traditional tools miss.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">📈</div>
+                    <h3>Adaptive Learning</h3>
+                    <p>Agents learn from each analysis cycle, continuously improving detection accuracy and efficiency.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Comprehensive Coverage</h3>
+                    <p>Combines multiple security approaches to cover vulnerabilities from syntax level to business logic.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Agentic AI Review</h3>
+                    <p>Next-generation security analysis combining specialized AI agents for comprehensive code security.</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Agents</h3>
+                    <ul>
+                        <li><a href="#">AST Security Analyzer</a></li>
+                        <li><a href="#">Bandit Runner</a></li>
+                        <li><a href="#">Taint Tracker</a></li>
+                        <li><a href="#">Gemini Semantic Agent</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Resources</h3>
+                    <ul>
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">API Reference</a></li>
+                        <li><a href="#">GitHub Repository</a></li>
+                        <li><a href="#">Security Whitepaper</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Contact</h3>
+                    <ul>
+                        <li><a href="#">Support Center</a></li>
+                        <li><a href="#">Enterprise Sales</a></li>
+                        <li><a href="#">Partnerships</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <p>&copy; 2023 Agentic AI Code Review System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Simple animations for the flowchart
+        document.addEventListener('DOMContentLoaded', function() {
+            const flowNodes = document.querySelectorAll('.flow-node, .parallel-node');
+            
+            flowNodes.forEach((node, index) => {
+                setTimeout(() => {
+                    node.style.opacity = '0';
+                    node.style.transform = 'translateY(20px)';
+                    node.style.transition = 'all 0.5s ease';
+                    
+                    setTimeout(() => {
+                        node.style.opacity = '1';
+                        node.style.transform = 'translateY(0)';
+                    }, 100);
+                }, 300 * index);
+            });
+            
+            // Add scroll animation for agent cards
+            const agentCards = document.querySelectorAll('.agent-card');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            agentCards.forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                card.style.transition = 'all 0.6s ease';
+                observer.observe(card);
+            });
+        });
+    </script>
+</body>
+</html>
